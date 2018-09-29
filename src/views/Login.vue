@@ -25,6 +25,7 @@ export default {
   name: 'login',
   data () {
     return {
+      loading: true,
       loginForm: {
         name: '',
         email: '',
@@ -37,8 +38,32 @@ export default {
       this.$http.post('/token', form)
       .then(res => {
         localStorage.setItem('id_token', JSON.stringify(res.data))
+        if (this.$route.query.redirect) {
+          this.$router.push(this.$route.query.redirect)
+        } else {
+          this.$router.push({ name: 'dashboard' })
+        }
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        this.loading = false
+        if (err.response.status === 406) {
+          this.retry = true
+        } else {
+          if (err.response.status === 404) {
+            this.$message({
+              showClose: true,
+              message: this.$t('Пользователь не найден'),
+              type: 'error'
+            })
+          } else if (err.response.status === 400) {
+            this.$message({
+              showClose: true,
+              message: this.$t('Введен неверный пароль'),
+              type: 'error'
+            })
+          }
+        }
+      })
     }
   }
 }
@@ -46,10 +71,11 @@ export default {
 
 <style lang="stylus" scoped>
   .auth-view
-    height 100%
-    width 100%
+    height 100vh
+    width 100vw
     background-color #7a97ab2b;
     display flex
+    align-items center
     justify-content center
     .b-form
       background-color #fff

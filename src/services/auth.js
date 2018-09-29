@@ -12,6 +12,7 @@ let _setToken = data => {
   }
   localStorage.setItem('id_token', JSON.stringify(data))
 }
+
 let _getToken = () => {
   return JSON.parse(localStorage.getItem('id_token'))
 }
